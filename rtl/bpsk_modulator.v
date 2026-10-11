@@ -1,63 +1,67 @@
-module bpsk_modulator #(
-    parameter DATA_WIDTH = 8,       // Bit resolution of output carrier
-    parameter SAMPLES_PER_SYM = 8   // 8 samples per symbol
-)(
-    input  wire                    clk,
-    input  wire                    rst_n,
-    input  wire                    data_in,
-    input  wire                    data_valid,
-    output reg  signed [DATA_WIDTH-1:0] bpsk_out,
-    output reg                    sample_valid
+module bpsk_modulator (
+    input  wire               clk,
+    input  wire               reset,        // Active-high synchronous/asynchronous reset
+    input  wire               data_bit,
+    input  wire               data_valid,   // 1-clock pulse for a NEW data bit
+    output reg  signed [15:0] bpsk_sample,  // Signed 16-bit sample output
+    output reg                sample_valid  // High when bpsk_sample is valid
 );
 
-    // 1. Sample Counter (0 to 7) & Current Bit Latch
-    reg [2:0] sample_cnt;
-    reg       current_bit;
+    reg        active;
+    reg [2:0]  sample_cnt;
+    reg        current_bit;
 
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            sample_cnt  <= 3'd0;
-            current_bit <= 1'b0;
-        end else if (data_valid) begin
-            if (sample_cnt == SAMPLES_PER_SYM - 1) begin
-                sample_cnt  <= 3'd0;
-                current_bit <= data_in; // Chốt bit dữ liệu mới
-            end else begin
-                sample_cnt  <= sample_cnt + 1'b1;
-            end
+    // 1. Carrier Look-Up Table (16-bit Signed LUT)
+    function signed [15:0] carrier;
+        input [2:0] idx;
+        begin
+            case (idx)
+                3'd0: carrier = 16'sd0;
+                3'd1: carrier = 16'sd707;
+                3'd2: carrier = 16'sd1000;
+                3'd3: carrier = 16'sd707;
+                3'd4: carrier = 16'sd0;
+                3'd5: carrier = -16'sd707;
+                3'd6: carrier = -16'sd1000;
+                3'd7: carrier = -16'sd707;
+                default: carrier = 16'sd0;
+            endcase
         end
-    end
+    endfunction
 
-    // 2. Carrier Look-Up Table (LUT) - 8 samples of Sine wave
-    reg signed [DATA_WIDTH-1:0] carrier_lut [0:SAMPLES_PER_SYM-1];
-
-    initial begin
-        carrier_lut[0] =  8'sd0;    //   0 deg
-        carrier_lut[1] =  8'sd90;   //  45 deg
-        carrier_lut[2] =  8'sd127;  //  90 deg
-        carrier_lut[3] =  8'sd90;   // 135 deg
-        carrier_lut[4] =  8'sd0;    // 180 deg
-        carrier_lut[5] = -8'sd90;   // 225 deg
-        carrier_lut[6] = -8'sd127;  // 270 deg
-        carrier_lut[7] = -8'sd90;   // 315 deg
-    end
-  
-    wire signed [DATA_WIDTH-1:0] lut_val = carrier_lut[sample_cnt];
-
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            bpsk_out     <= {DATA_WIDTH{1'b0}};
+    // 2. Modulator Sequential Logic
+    // Bit 0 -> +carrier
+    // Bit 1 -> -carrier
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            active       <= 1'b0;
+            sample_cnt   <= 3'd0;
+            current_bit  <= 1'b0;
+            bpsk_sample  <= 16'sd0;
             sample_valid <= 1'b0;
-        end else if (data_valid) begin
-            sample_valid <= 1'b1;
-            if (current_bit == 1'b0) begin
-                bpsk_out <= lut_val;   // Bit 0 -> +carrier
-            end else begin
-                bpsk_out <= -lut_val;  // Bit 1 -> -carrier
-            end
         end else begin
-            bpsk_out     <= {DATA_WIDTH{1'b0}};
             sample_valid <= 1'b0;
+            bpsk_sample  <= 16'sd0;
+
+            if (!active) begin
+                if (data_valid) begin
+                    current_bit  <= data_bit;
+                    bpsk_sample  <= data_bit ? -carrier(3'd0) : carrier(3'd0);
+                    sample_valid <= 1'b1;
+                    sample_cnt   <= 3'd1;
+                    active       <= 1'b1;
+                end
+            end else begin
+                bpsk_sample  <= current_bit ? -carrier(sample_cnt) : carrier(sample_cnt);
+                sample_valid <= 1'b1;
+
+                if (sample_cnt == 3'd7) begin
+                    sample_cnt <= 3'd0;
+                    active     <= 1'b0; 
+                end else begin
+                    sample_cnt <= sample_cnt + 3'd1;
+                end
+            end
         end
     end
 
