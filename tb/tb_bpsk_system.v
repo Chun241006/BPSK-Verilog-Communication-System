@@ -34,22 +34,22 @@ module tb_bpsk_system;
  pending_valid=bit_valid; pending_bit=recovered_bit;
  #1;
  if(reset) begin
-   if(dut.tx_valid!==0 || dut.rx_valid!==0 || bit_valid!==0 || total_bits!==0 || error_bits!==0)
+   if(dut.tx_sample_valid!==0 || dut.rx_sample_valid!==0 || bit_valid!==0 || total_bits!==0 || error_bits!==0)
      fail("reset did not clear valid/counters");
    previous_tx_valid=0; previous_tx_sample=0; channel_samples=0;
  end else if(monitor) begin
-   if(dut.tx_valid!==1'b0 && dut.tx_valid!==1'b1) fail("unknown TX valid");
-   if(dut.rx_valid!==1'b0 && dut.rx_valid!==1'b1) fail("unknown RX valid");
+   if(dut.tx_sample_valid!==1'b0 && dut.tx_sample_valid!==1'b1) fail("unknown TX valid");
+   if(dut.rx_sample_valid!==1'b0 && dut.rx_sample_valid!==1'b1) fail("unknown RX valid");
    if(bit_valid!==1'b0 && bit_valid!==1'b1) fail("unknown bit_valid");
-   if(dut.rx_valid!==previous_tx_valid) fail("channel valid is not delayed by one clock");
+   if(dut.rx_sample_valid!==previous_tx_valid) fail("channel valid is not delayed by one clock");
    if(previous_tx_valid && $signed(dut.rx_sample)!==(previous_invert ? -previous_tx_sample : previous_tx_sample))
      fail("channel sample pipeline mismatch");
-   if(dut.tx_valid===1) begin
+   if(dut.tx_sample_valid===1) begin
      if(ntx>=sent*8) fail("extra TX sample");
      else if(dut.tx_sample!==golden_tx[base*8+ntx]) fail($sformatf("TX[%0d] RTL=%0d golden=%0d",ntx,$signed(dut.tx_sample),golden_tx[base*8+ntx]));
      ntx=ntx+1;
    end
-   if(dut.rx_valid===1) begin
+   if(dut.rx_sample_valid===1) begin
      if(nrx>=sent*8) fail("extra RX sample");
      else if(dut.rx_sample!==golden_rx[base*8+nrx]) fail($sformatf("RX[%0d] RTL=%0d golden=%0d",nrx,$signed(dut.rx_sample),golden_rx[base*8+nrx]));
      nrx=nrx+1;
@@ -68,12 +68,12 @@ module tb_bpsk_system;
      else if(recovered_bit!==golden_rx_bits[base+decoded][0]) fail($sformatf("bit[%0d] RTL=%b golden=%b",decoded,recovered_bit,golden_rx_bits[base+decoded][0]));
      decoded=decoded+1;
    end
-   previous_tx_valid=dut.tx_valid; previous_tx_sample=dut.tx_sample;
+   previous_tx_valid=dut.tx_sample_valid; previous_tx_sample=dut.tx_sample;
    previous_invert=error_enable && ((channel_samples/8)%256==error_symbol_index);
-   if(dut.tx_valid===1) channel_samples=channel_samples+1;
+   if(dut.tx_sample_valid===1) channel_samples=channel_samples+1;
  end
  if(monitor) begin
-   $fdisplay(tracefile,"%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",$time,cid,data_valid,data_bit,dut.tx_valid,$signed(dut.tx_sample),dut.rx_valid,$signed(dut.rx_sample),bit_valid,recovered_bit,total_bits,error_bits,reset);
+   $fdisplay(tracefile,"%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",$time,cid,data_valid,data_bit,dut.tx_sample_valid,$signed(dut.tx_sample),dut.rx_sample_valid,$signed(dut.rx_sample),bit_valid,recovered_bit,total_bits,error_bits,reset);
  end
  end
  task do_reset;

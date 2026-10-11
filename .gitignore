@@ -21,3 +21,4 @@ vsim.wlf
 # OS files
 .DS_Store
 Thumbs.db
+simulation/results/
