@@ -1,75 +1,58 @@
-module bpsk_demodulator #(
-    parameter DATA_WIDTH = 8,          // Bit resolution of input signal
-    parameter SAMPLES_PER_SYM = 8      // 8 samples per symbol
-)(
-    input  wire                         clk,
-    input  wire                         rst_n,
-    input  wire signed [DATA_WIDTH-1:0] received_in,
-    input  wire                         sample_valid,
-
-    output reg                          recovered_bit,
-    output reg                          bit_valid
+// COS201 - BPSK correlator/demodulator, 16-bit signed, 8 samples/symbol.
+// Pause/resume across rx_valid=0 gaps; one bit_valid pulse per 8 samples.
+module bpsk_demodulator (
+    input  wire               clk,
+    input  wire               reset, // active high
+    input  wire signed [15:0] rx_sample,
+    input  wire               sample_valid,
+    output reg                recovered_bit,
+    output reg                bit_valid
 );
-
-    // 1. Sample Counter & Correlation Accumulator
     reg [2:0] sample_cnt;
+    reg signed [35:0] accumulator;
 
-    // Accumulator stores the sum of correlation products
-    reg signed [DATA_WIDTH*2+3:0] accumulator;
+    function signed [15:0] carrier;
+        input [2:0] idx;
+        begin
+            case (idx)
+                3'd0: carrier = 16'sd0;
+                3'd1: carrier = 16'sd707;
+                3'd2: carrier = 16'sd1000;
+                3'd3: carrier = 16'sd707;
+                3'd4: carrier = 16'sd0;
+                3'd5: carrier = -16'sd707;
+                3'd6: carrier = -16'sd1000;
+                3'd7: carrier = -16'sd707;
+            endcase
+        end
+    endfunction
 
-    // 2. Carrier Look-Up Table (LUT)
-    reg signed [DATA_WIDTH-1:0] carrier_lut [0:SAMPLES_PER_SYM-1];
+    wire signed [31:0] product;
+    wire signed [35:0] product_ext;
+    wire signed [35:0] correlation_sum;
+    assign product = rx_sample * carrier(sample_cnt);
+    assign product_ext = {{4{product[31]}}, product};
+    assign correlation_sum = accumulator + product_ext;
 
-    initial begin
-        carrier_lut[0] =  8'sd0;    //   0 deg
-        carrier_lut[1] =  8'sd90;   //  45 deg
-        carrier_lut[2] =  8'sd127;  //  90 deg
-        carrier_lut[3] =  8'sd90;   // 135 deg
-        carrier_lut[4] =  8'sd0;    // 180 deg
-        carrier_lut[5] = -8'sd90;   // 225 deg
-        carrier_lut[6] = -8'sd127;  // 270 deg
-        carrier_lut[7] = -8'sd90;   // 315 deg
-    end
-
-    // 3. Correlation Logic
-    wire signed [DATA_WIDTH*2-1:0] correlation_product;
-    wire signed [DATA_WIDTH*2+3:0] correlation_sum;
-
-    assign correlation_product =
-        received_in * carrier_lut[sample_cnt];
-
-    // Add current product to previous accumulated value
-    assign correlation_sum = accumulator + correlation_product;
-
-    // 4. Accumulation & Decision Logic
-    always @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
             sample_cnt    <= 3'd0;
-            accumulator   <= 0;
+            accumulator   <= 36'sd0;
             recovered_bit <= 1'b0;
             bit_valid     <= 1'b0;
         end else begin
             bit_valid <= 1'b0;
-
             if (sample_valid) begin
-                if (sample_cnt == SAMPLES_PER_SYM - 1) begin
-                    // Complete one symbol (8 samples)
-                    // Make decision using the full correlation result
-                    if (correlation_sum < 0)
-                        recovered_bit <= 1'b1;
-                    else
-                        recovered_bit <= 1'b0;
-
-                    bit_valid   <= 1'b1;
-                    sample_cnt  <= 3'd0;
-                    accumulator <= 0;
+                if (sample_cnt == 3'd7) begin
+                    recovered_bit <= (correlation_sum < 0);
+                    bit_valid     <= 1'b1;
+                    sample_cnt    <= 3'd0;
+                    accumulator   <= 36'sd0;
                 end else begin
-                    // Continue accumulating correlation products
+                    sample_cnt  <= sample_cnt + 3'd1;
                     accumulator <= correlation_sum;
-                    sample_cnt  <= sample_cnt + 1'b1;
                 end
             end
         end
     end
-
 endmodule
