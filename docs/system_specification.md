@@ -81,6 +81,27 @@ the carrier samples are inverted.
 The sample index runs from:
 0 → 1 → 2 → ... → 7
 After the eighth sample, the modulator finishes the current symbol and waits for the next valid input bit.
+### 6.1 Input Acceptance Rule
+
+The Modulator accepts a new input bit only when it is idle.
+
+The data_valid signal must be asserted for one clock cycle
+to indicate a new input bit.
+
+Each accepted input bit generates exactly 8 consecutive
+valid BPSK samples.
+
+While generating these 8 samples, the Modulator does not
+accept additional input bits.
+
+If data_valid is asserted while the Modulator is busy,
+the new input bit is ignored.
+
+The Testbench must wait until the current symbol is
+completed before sending the next input bit.
+
+No input FIFO or ready/valid handshake is implemented
+in the initial project version.
 
 
 ## 7. Channel Specification
@@ -115,8 +136,10 @@ r[i] = received sample
 c[i] = reference carrier sample
 
 Decision Rule
-correlation > 0 → recovered_bit = 0
+correlation >= 0 → recovered_bit = 0
 correlation < 0 → recovered_bit = 1
+
+If correlation equals zero, the recovered bit is defined as 0.
 The correlation value is calculated using signed arithmetic.
 After all 8 samples of a symbol have been processed, the demodulator generates a recovered bit and asserts bit_valid.
 
@@ -146,28 +169,42 @@ After reset is released, the system is ready for normal operation.
 
 
 ## 11. Timing Model
-The project uses a simplified synchronous digital timing model.
-One clock cycle represents one sample period.
-For each transmitted bit:
-1 bit = 1 symbol = 8 samples
+The system uses a synchronous digital timing model.
+
+Each BPSK symbol represents one input bit.
+
+One BPSK symbol contains exactly 8 valid samples.
+
+During symbol generation, the Modulator produces
+one valid sample per clock cycle.
+
 Therefore:
-8 clock cycles = 1 BPSK symbol
+
+1 bit = 1 symbol = 8 valid samples
+
+The Modulator accepts a new input bit only when idle.
+
+Additional idle clock cycles may occur between symbols.
+
+The Channel and Demodulator may introduce processing
+latency before the recovered bit becomes valid.
+
+Therefore, the total number of clock cycles from
+input bit acceptance to recovered bit output may
+be greater than 8.
 
 Example:
-Input bits:
 
-1    0    1
+Input bits: 1 0 1
 
-Each bit:
+Bit 1: 8 valid samples
+Bit 0: 8 valid samples
+Bit 1: 8 valid samples
 
-8 samples
-8 samples
-8 samples
+Total: 24 valid sample cycles.
 
-Total:
-
-24 sample clock cycles
-
+This total does not include possible idle cycles
+or additional processing latency.
 
 ## 12. Data Flow
 The complete data flow is:
@@ -282,4 +319,5 @@ The channel uses a controlled digital error model.
 The system is implemented using synchronous Verilog RTL.
 The system is verified using simulation.
 BER is used as the main performance metric.
+
 Any change to these core specifications should be discussed and agreed upon by the team before implementation.

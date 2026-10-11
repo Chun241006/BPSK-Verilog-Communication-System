@@ -69,7 +69,9 @@ The project uses:
 Each symbol contains exactly 8 samples:
 1 symbol = 8 samples
 Therefore:
-8 clock cycles = 1 BPSK symbol
+8 valid sample cycles = 1 BPSK symbol
+
+Idle clock cycles may occur between symbols.
 The sample positions inside one symbol are:
 Sample index:
 0
@@ -98,7 +100,17 @@ The symbol counter increments after the eighth valid sample of a symbol.
 
 Therefore:
 8 valid samples → symbol counter + 1
-The counter wraps around naturally when the maximum counter value is reached.
+The initial Channel uses an 8-bit symbol counter.
+
+The symbol counter can represent values from 0 to 255.
+
+After symbol 255, the counter wraps around to 0.
+
+If error_enable remains asserted, the selected error
+symbol may be inverted again after 256 symbols.
+
+For deterministic single-error tests, the Testbench
+should transmit no more than 256 symbols per reset.
 
 
 ## 6. Error Symbol Selection
@@ -147,9 +159,28 @@ and current_symbol == error_symbol_index
 
 rx_sample = -tx_sample
 
-The output valid signal follows the input valid signal:
-rx_valid = sample_valid
+### 7.1 Output Valid Timing
 
+The Channel uses registered outputs.
+
+At each rising clock edge, the Channel processes
+the input sample and its sample_valid signal.
+
+The rx_sample and rx_valid outputs are registered
+together to keep data and valid signals aligned.
+
+The Channel introduces one pipeline stage.
+
+Therefore, the output corresponds to the input
+sample captured at the previous clock edge.
+
+rx_valid is asserted only for valid received samples.
+
+When sample_valid = 0:
+- rx_valid is set to 0.
+- rx_sample is set to 0.
+
+The Channel preserves the order of all valid samples.
 
 ## 8. Channel Processing Flow
 The complete channel processing flow is:
@@ -231,7 +262,21 @@ Clock       Symbol       Operation
 23          2            Normal
 
 Therefore, only Symbol 1 is inverted.
+### 9.1 Pipeline Timing Note
 
+The timing table above describes the order of
+valid input samples.
+
+The Channel uses registered outputs, introducing
+one pipeline stage.
+
+The output rx_sample and rx_valid are updated
+together after the input sample is captured.
+
+Idle clock cycles do not advance the sample counter
+or symbol counter.
+
+The Channel preserves the original sample order.
 
 ## 10. Example
 Assume the transmitted bit sequence is:
@@ -314,7 +359,11 @@ Error injection is implemented by sign inversion.
 No random noise is required.
 No AWGN model is required.
 The Channel must preserve the sample timing.
-rx_valid follows sample_valid.
+rx_valid is registered and aligned with rx_sample.
+
+The Channel introduces one pipeline stage,
+so rx_valid follows the corresponding input
+sample_valid after the register delay.
 The design must use signed arithmetic for BPSK samples.
 
 

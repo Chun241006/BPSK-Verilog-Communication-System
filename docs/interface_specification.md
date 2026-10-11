@@ -77,11 +77,19 @@ module bpsk_modulator (
 );
 
 4.5 Operation
-When:
-data_valid = 1
-the modulator accepts data_bit.
-The modulator then generates 8 samples.
+When data_valid = 1 and the Modulator is idle,
+the Modulator accepts data_bit.
 
+The data_valid signal must be asserted for one clock cycle.
+
+After accepting a bit, the Modulator generates
+8 consecutive valid BPSK samples.
+
+If data_valid is asserted while the Modulator is busy,
+the new input bit is ignored.
+
+The Testbench must send a new bit only when
+the Modulator is ready to accept it.
 For:
 data_bit = 0
 the output is:
@@ -187,12 +195,11 @@ The demodulator collects 8 received samples.
 For each sample:
 correlation += rx_sample × reference_carrier
 After 8 samples:
-if correlation > 0:
+if correlation >= 0:
     recovered_bit = 0
 
 if correlation < 0:
     recovered_bit = 1
-
 Then:
 bit_valid = 1
 for one clock cycle.
@@ -228,23 +235,31 @@ module ber_counter (
     output logic [31:0] error_bits
 );
 
-7.5 Operation
-When a new transmitted bit is accepted:
-tx_valid = 1
-the BER counter stores the transmitted bit.
-When a recovered bit becomes available:
-rx_valid = 1
-the stored transmitted bit is compared with rx_bit.
-If:
-tx_bit == rx_bit
-then:
-error_bits remains unchanged
-If:
-tx_bit != rx_bit
-then:
-error_bits = error_bits + 1
-For every successfully compared bit:
-total_bits = total_bits + 1
+### 7.5 Operation
+
+The BER Counter uses a 16-entry TX bit FIFO
+to store transmitted bits.
+
+When tx_valid = 1:
+- Store the accepted TX bit in the FIFO.
+- Advance the FIFO write pointer.
+
+When rx_valid = 1 and the FIFO is not empty:
+- Read the oldest TX bit from the FIFO.
+- Compare the stored TX bit with rx_bit.
+- Increment total_bits by 1.
+- Increment error_bits by 1 if the bits differ.
+- Remove the compared TX bit from the FIFO.
+
+The FIFO preserves the original TX bit order.
+
+The BER Counter must support simultaneous
+TX insertion and RX comparison.
+
+No comparison is performed when the FIFO is empty.
+
+The FIFO pointers, occupancy counter, total_bits,
+and error_bits are cleared when reset = 1.
 
 ## 8. Top-Level Interface
 
@@ -301,20 +316,29 @@ Therefore:
 1 recovered bit
 
 ## 10. Valid Signal Convention
-The valid signals are one-cycle pulses.
 
-data_valid
-Indicates that data_bit contains a new input bit.
+The system uses valid signals to indicate when data is available.
 
-sample_valid
-Indicates that bpsk_sample contains a valid sample.
+### 10.1 data_valid
+- A one-clock pulse indicating a new input bit.
+- The Modulator accepts the bit only when idle.
 
-rx_valid
-Indicates that rx_sample contains a valid received sample.
+### 10.2 sample_valid
+- High whenever bpsk_sample contains a valid sample.
+- It may remain high for 8 consecutive clock cycles.
+- Each accepted input bit produces exactly 8 valid samples.
 
-bit_valid
-Indicates that recovered_bit contains a newly decoded bit.
-The valid signals are used to control data flow between modules.
+### 10.3 rx_valid
+- High whenever rx_sample contains a valid received sample.
+- It must be aligned with the corresponding rx_sample.
+- The Channel may introduce a one-clock pipeline delay.
+
+### 10.4 bit_valid
+- A one-clock pulse indicating a newly recovered bit.
+- It is asserted after 8 valid received samples have been processed.
+
+### 10.5 General Rule
+Data must only be processed when its corresponding valid signal is asserted.
 
 ## 11. Interface Consistency Rules
 All team members must follow these rules:
