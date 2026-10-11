@@ -88,74 +88,113 @@ module ber_counter (
 );
 
 ## 6. TX Bit Storage
-The transmitted bit and recovered bit do not necessarily become valid at the same clock cycle.
-One transmitted bit generates 8 BPSK samples.
-The demodulator then processes these 8 samples before producing the recovered bit.
-Therefore, the BER Counter needs to store the transmitted bit.
-The basic process is:
-TX bit
-  |
-  | tx_valid
-  v
-+----------------+
-| TX Bit Register|
-+----------------+
-        |
-        | wait
-        v
-Recovered Bit
-        |
-        | rx_valid
-        v
-     Compare
 
-When:
-tx_valid = 1
-the BER Counter stores:
-stored_tx_bit = tx_bit
-The stored bit remains available until the corresponding recovered bit is received.
+The BER Counter must store transmitted bits until
+their corresponding recovered bits become available.
+
+One transmitted bit produces 8 BPSK samples.
+The Channel and Demodulator introduce processing latency.
+
+Therefore, multiple TX bits may be waiting for comparison.
+
+### 6.1 TX Bit FIFO
+
+The BER Counter uses a FIFO (First-In, First-Out)
+to store transmitted bits in their original order.
+
+The initial design uses a 16-entry TX bit FIFO.
+
+When tx_valid = 1:
+- Store tx_bit at the FIFO write position.
+- Advance the write pointer.
+
+When rx_valid = 1:
+- Read the oldest stored TX bit.
+- Compare it with rx_bit.
+- Remove the compared TX bit from the FIFO.
+- Advance the read pointer.
+
+### 6.2 FIFO Rules
+
+- TX and RX bits must be compared in the correct order.
+- The FIFO must not be read when empty.
+- The FIFO must not be written when full.
+- Simultaneous TX insertion and RX comparison must be supported.
+- tx_valid must indicate a bit actually accepted by the Modulator.
+- The Testbench must respect the Modulator input timing.
+
+### 6.3 Reset Behavior
+
+When reset = 1:
+- Clear the FIFO read pointer.
+- Clear the FIFO write pointer.
+- Clear the FIFO occupancy counter.
+- Clear the BER counters.
+
+After reset, the FIFO starts empty.
 
 
 ## 7. Bit Comparison
-When:
-rx_valid = 1
-the BER Counter compares:
-stored_tx_bit
-with:
-rx_bit
 
-Case 1: Correct Bit
-If:
-stored_tx_bit == rx_bit
-then:
-total_bits = total_bits + 1
-and:
-error_bits
-remains unchanged.
+The BER Counter compares recovered bits with
+the corresponding transmitted bits stored in the FIFO.
 
-Case 2: Incorrect Bit
+When rx_valid = 1 and the FIFO is not empty:
+
+1. Read the oldest TX bit from the FIFO.
+2. Compare the FIFO head bit with rx_bit.
+3. Increment total_bits by 1.
+4. Increment error_bits by 1 only if the bits differ.
+5. Remove the compared TX bit from the FIFO.
+
+### 7.1 Correct Bit
+
 If:
-stored_tx_bit != rx_bit
-then:
+
+FIFO head bit == rx_bit
+
+Then:
+
 total_bits = total_bits + 1
-and:
+
+error_bits remains unchanged.
+
+### 7.2 Incorrect Bit
+
+If:
+
+FIFO head bit != rx_bit
+
+Then:
+
+total_bits = total_bits + 1
+
 error_bits = error_bits + 1
 
+### 7.3 Empty FIFO
+
+If rx_valid = 1 but the FIFO is empty,
+no comparison is performed.
+
+The counters must not be updated.
+
+This condition indicates a possible timing
+or integration error and should be detected
+during simulation.
 
 ## 8. Counter Behavior
 The BER Counter maintains two counters.
 Total Bit Counter
 total_bits
 This counter represents the number of successfully compared TX/RX bit pairs.
-It increments once for every:
-rx_valid = 1
-event.
+It increments only when rx_valid = 1
+and the TX bit FIFO is not empty.
 
 Error Bit Counter
 error_bits
 This counter represents the number of mismatched TX/RX bit pairs.
 It increments only when:
-stored_tx_bit != rx_bit
+FIFO head bit != rx_bit
 
 
 ## 9. Counter Example
@@ -237,44 +276,68 @@ and:
 BER = 2 / 8
     = 0.25
 
+### Important Note
+
+The initial Channel supports one selected error symbol
+at a time using error_symbol_index.
+
+To generate multiple errors in a system-level test,
+the error configuration must be changed between symbols.
+
+Alternatively, multiple-error cases can be verified
+using a standalone BER Counter testbench.
+
+The BER Counter itself supports counting multiple
+bit errors during a simulation.
+
 
 ## 13. Reset Behavior
-When:
-reset = 1
-the BER Counter clears:
-total_bits = 0
-error_bits = 0
-stored_tx_bit = 0
-After reset is released:
-reset = 0
-the BER Counter begins normal operation.
 
+When reset = 1, the BER Counter shall:
+
+- Set total_bits = 0.
+- Set error_bits = 0.
+- Clear the FIFO read pointer.
+- Clear the FIFO write pointer.
+- Set the FIFO occupancy counter to 0.
+- Mark the TX bit FIFO as empty.
+
+After reset is released (reset = 0),
+the BER Counter is ready to store new TX bits
+and compare them with recovered RX bits.
 
 ## 14. Valid Signal Timing
-The BER Counter uses valid signals to determine when data should be processed.
-TX Valid
-When:
-tx_valid = 1
-a new transmitted bit is available.
-The BER Counter stores the bit.
-RX Valid
-When:
-rx_valid = 1
-a recovered bit is available.
-The BER Counter compares the recovered bit with the stored transmitted bit.
-Therefore:
-tx_valid
-   |
-   v
-Store TX Bit
-   |
-   | 8 sample cycles
-   v
-rx_valid
-   |
-   v
-Compare TX and RX
 
+The BER Counter uses two valid signals:
+
+### 14.1 TX Valid
+
+When tx_valid = 1:
+- A new TX bit has been accepted by the Modulator.
+- The BER Counter stores this bit in the FIFO.
+
+### 14.2 RX Valid
+
+When rx_valid = 1:
+- A recovered bit is available from the Demodulator.
+- The BER Counter reads the oldest TX bit from the FIFO.
+- The TX and RX bits are compared.
+- The BER counters are updated.
+
+The BER Counter's rx_valid input is connected
+to the Demodulator's bit_valid output.
+
+### 14.3 Timing Rule
+
+The recovered bit is produced after the Demodulator
+processes 8 valid received samples.
+
+Additional clock cycles may occur because of
+idle periods and pipeline latency.
+
+The BER Counter must preserve TX bit order
+using the FIFO instead of assuming a fixed delay
+between tx_valid and rx_valid.
 
 ## 15. BER Calculation in RTL
 The RTL block does not need to continuously calculate a floating-point BER value.

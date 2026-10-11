@@ -12,6 +12,7 @@ The system consists of five main stages:
 
 
 ## 2. Detailed Block Diagram
+![Detailed BPSK Block Diagram](2.%20Detailed%20Block%20Diagram.png)
 
 
 ## 3. Block Descriptions
@@ -59,8 +60,10 @@ where:
 r[i] is the received sample.
 c[i] is the reference carrier sample.
 The decision rule is:
-correlation > 0  →  recovered bit = 0
-correlation < 0  →  recovered bit = 1
+correlation >= 0 → recovered bit = 0
+correlation < 0 → recovered bit = 1
+
+If correlation equals zero, the recovered bit is defined as 0.
 This works because bit 0 is represented by the positive carrier and bit 1 is represented by the inverted carrier.
 
 3.5 BER Counter
@@ -76,8 +79,8 @@ RX Bit ──────┘
 
 If the two bits are different, the error counter is incremented.
 The system keeps track of:
-- Total transmitted bits
-- Number of error bits
+- Total number of compared TX/RX bit pairs.
+- Number of incorrect bit pairs.
 The Bit Error Rate is calculated as:
 BER = Number of Error Bits / Total Number of Bits
 
@@ -109,3 +112,29 @@ BPSK demodulation
 Controlled transmission errors
 BER measurement
 RTL implementation and simulation
+
+## 7. Golden Model and RTL Verification
+
+The project uses a Python Golden Model as a reference
+to verify the Verilog RTL implementation.
+
+The Golden Model implements:
+- BPSK Modulation
+- Controlled Channel
+- BPSK Demodulation
+- BER Calculation
+
+The Golden Model generates expected outputs:
+- TX samples
+- RX samples
+- Recovered bits
+- Expected BER results
+
+The Verilog Testbench compares RTL outputs with
+the corresponding Golden Model reference outputs.
+
+If all comparisons are correct, the test passes.
+Otherwise, the testbench reports a failure.
+
+The Golden Model is used for verification only.
+It is not part of the synthesizable RTL datapath.

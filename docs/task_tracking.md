@@ -559,3 +559,28 @@ Week 5: RTL Implementation
 
 The project is ready to move from system-level design to RTL implementation.
 
+## 12. Additional Project Requirements
+
+### Golden Model
+
+- Member 1: Develop the Python Golden Model and generate reference files.
+- Member 2: Verify the Golden Model correlation and demodulation results.
+- Member 3: Compare Verilog RTL outputs against Golden Model references.
+- Leader: Review Golden Model integration and verification results.
+
+### Project Report
+
+- Leader: Introduction, system architecture, Channel, BER, and integration.
+- Member 1: BPSK Modulator and Golden Model.
+- Member 2: BPSK Demodulator and correlation.
+- Member 3: Testbench, simulation results, waveform analysis, and BER verification.
+
+### Completion Requirements
+
+- Golden Model implemented and tested.
+- RTL outputs compared with Golden Model.
+- Simulation PASS/FAIL results recorded.
+- Final report completed.
+
+Status: In Progress
+
