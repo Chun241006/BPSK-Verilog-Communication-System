@@ -10,7 +10,7 @@ module bpsk_modulator (
     reg        active;
     reg [2:0]  sample_cnt;
     reg        current_bit;
-
+    
     // 1. Carrier Look-Up Table (16-bit Signed LUT)
     function signed [15:0] carrier;
         input [2:0] idx;
@@ -28,6 +28,7 @@ module bpsk_modulator (
             endcase
         end
     endfunction
+
 
     // 2. Modulator Sequential Logic
     // Bit 0 -> +carrier
@@ -52,12 +53,13 @@ module bpsk_modulator (
                     active       <= 1'b1;
                 end
             end else begin
+                // Xuat cac mau tiep theo (sample 1 den 7)
                 bpsk_sample  <= current_bit ? -carrier(sample_cnt) : carrier(sample_cnt);
                 sample_valid <= 1'b1;
 
                 if (sample_cnt == 3'd7) begin
                     sample_cnt <= 3'd0;
-                    active     <= 1'b0; 
+                    active     <= 1'b0; // Hoan thanh 8 samples cho 1 bit, quay ve IDLE
                 end else begin
                     sample_cnt <= sample_cnt + 3'd1;
                 end
