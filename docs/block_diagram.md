@@ -11,8 +11,8 @@ The system consists of five main stages:
 5. BER Counter
 
 
-## 2. Detailed Block Diagram
-![Detailed BPSK Block Diagram](2.%20Detailed%20Block%20Diagram.png)
+## 2. System Architecture Diagram.
+![Top-down BPSK RTL architecture](images/architecture_overview.png)
 
 
 ## 3. Block Descriptions

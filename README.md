@@ -7,8 +7,7 @@ This student project implements a digital **Binary Phase Shift Keying (BPSK)** c
 > **Scope:** Functional RTL simulation. The channel is a deterministic sign-inversion model, **not** an AWGN/real-RF channel. No FPGA or ASIC implementation is claimed.
 
 ## Architecture / top-down design
-
-![BPSK detailed block diagram](docs/2.%20Detailed%20Block%20Diagram.png)
+![Top-down BPSK RTL architecture](docs/images/architecture_overview.png)
 
 ```text
 Binary data (data_bit, data_valid)
