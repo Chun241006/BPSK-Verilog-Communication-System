@@ -55,4 +55,4 @@ Expected summary:
 ## Additional member evidence
 
 - Member 1: modulator bit 0 and bit 1 waveform/CSV sample checks passed (8 valid samples each).
-- Member 2: an independently supplied no-error demodulator CSV reports 16 bits, 0 errors, PASS. The separate one-error screenshot was not accompanied by a complete one-error CSV result.
+- Member 2: Both standalone demodulator tests passed. Scenario 0 recovered 16 bits with 0 errors (BER = 0%). Scenario 1 recovered 16 bits with one intentionally inverted symbol at index 3 (BER = 6.25%). Both tests reported zero RTL mismatches. Supporting evidence is available in `docs/results/` and `docs/images/`.

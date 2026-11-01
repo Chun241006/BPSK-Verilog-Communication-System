@@ -114,7 +114,7 @@ The script regenerates `model/reference/` and writes output under `simulation/re
 - Representative cases: all-zero/all-one, alternating bits, error first/middle/last/outside range, randomized patterns, input gaps, reset, 256/300-symbol sequences, idle.
 - **Recorded integrated result:** 17/17 test cases PASS (ModelSim, 2026-11-01; Errors: 0, Warnings: 0; 72,160 ns simulation).
 - **Member 1 evidence:** Modulator bit 0 and bit 1 each passed eight expected sample checks in the submitted CSV.
-- **Member 2 evidence:** No-error Demodulator scenario passed 16 bits with BER 0 in submitted CSV. The separate one-error plot has not been accompanied by a complete one-error CSV row and should not be treated as a standalone verified PASS.
+- **Member 2 evidence:** Both standalone demodulator scenarios passed. The clean scenario recovered 16 bits with 0 errors (BER = 0%). The single-error scenario inverted symbol index 3, resulting in 1 error out of 16 bits (BER = 6.25%). Both scenarios reported zero RTL mismatches. See [Demodulator and BER Verification](docs/demodulator_ber_explanation.md).
 
 ### Illustrations
 
