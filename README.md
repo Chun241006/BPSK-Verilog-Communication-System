@@ -126,7 +126,73 @@ The script regenerates `model/reference/` and writes output under `simulation/re
 ![Demodulator no-error](docs/images/waveform_no_error.png)
 
 ## Documentation
+## Detailed RTL Design
 
+The project follows a top-down design methodology, from system
+architecture to module-level RTL implementation.
+
+### Top-Down System Architecture
+
+![Top-Down RTL Architecture](docs/images/top_down_signal_architecture.png)
+
+### Module-Level Detailed Design
+
+The detailed implementation includes four RTL modules:
+
+- [BPSK Modulator Detailed Design](docs/images/detailed_modulator.png)
+- [Digital Channel Detailed Design](docs/images/detailed_channel.png)
+- [BPSK Demodulator Detailed Design](docs/images/detailed_demodulator.png)
+- [BER Counter Detailed Design](docs/images/detailed_ber_counter.png)
+
+Each diagram describes the implemented registers, data paths,
+control signals, and processing logic.
+
+[Read the Complete Detailed Design](docs/detailed_design.md)
+
+## Golden Model and RTL Comparison
+
+An independent Python Golden Model generates reference data
+for verifying the Verilog RTL implementation.
+
+### Python Golden Model Architecture
+
+![Golden Model Pipeline](docs/images/golden_model_pipeline.png)
+
+### Golden Model vs Verilog RTL
+
+![Golden Model vs RTL Comparison](docs/images/golden_vs_rtl_comparison.png)
+
+The self-checking testbench compares the actual RTL outputs
+against the Golden Model reference data, including:
+
+- Transmitted BPSK samples
+- Received samples after channel processing
+- Recovered binary bits
+- Total bit count and error bit count
+
+### Integrated Verification Results
+
+The ModelSim simulation passed all 17 defined test cases
+with zero mismatches against the Python Golden Model.
+
+![17 Test Cases PASS](docs/images/golden_17_case_results.png)
+
+Verification evidence:
+
+- [Simulation Results CSV](docs/results/system_integration/test_results.csv)
+- [Simulation Results Log](docs/results/system_integration/test_results.txt)
+- [Simulation Signal Trace](docs/results/system_integration/sample_trace.csv)
+
+### Demodulator BER Verification
+
+Two standalone demodulator scenarios were verified:
+
+- Scenario 0: 0/16 errors, BER = 0%
+- Scenario 1: 1/16 errors, BER = 6.25%
+
+![BER Comparison](docs/images/demodulator_ber_comparison.png)
+
+[Complete Golden Model Verification Documentation](docs/golden_model_visual_verification.md)
 - [Block diagram and system description](docs/block_diagram.md)
 - [System specification](docs/system_specification.md)
 - [Interface specification](docs/interface_specification.md)
