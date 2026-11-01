@@ -193,6 +193,7 @@ Two standalone demodulator scenarios were verified:
 ![BER Comparison](docs/images/demodulator_ber_comparison.png)
 
 [Complete Golden Model Verification Documentation](docs/golden_model_visual_verification.md)
+## Documentation
 - [Block diagram and system description](docs/block_diagram.md)
 - [System specification](docs/system_specification.md)
 - [Interface specification](docs/interface_specification.md)
