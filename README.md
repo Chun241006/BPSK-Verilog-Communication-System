@@ -125,7 +125,7 @@ The script regenerates `model/reference/` and writes output under `simulation/re
 
 ![Demodulator no-error](docs/images/waveform_no_error.png)
 
-## Documentation
+
 ## Detailed RTL Design
 
 The project follows a top-down design methodology, from system
