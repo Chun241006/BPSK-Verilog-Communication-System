@@ -1,0 +1,19 @@
+Scope: team_rtl; no PASS applies to another RTL implementation
+PASS case=0 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=1 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=2 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=3 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=4 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=5 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=6 bits=8 TX=64 RX=64 recovered=8 total=8 errors=1
+PASS case=7 bits=8 TX=64 RX=64 recovered=8 total=8 errors=1
+PASS case=8 bits=8 TX=64 RX=64 recovered=8 total=8 errors=1
+PASS case=9 bits=8 TX=64 RX=64 recovered=8 total=8 errors=0
+PASS case=10 bits=100 TX=800 RX=800 recovered=100 total=100 errors=0
+PASS case=11 bits=100 TX=800 RX=800 recovered=100 total=100 errors=1
+PASS case=12 bits=8 TX=64 RX=64 recovered=8 total=8 errors=1
+PASS case=13 bits=2 TX=16 RX=16 recovered=2 total=2 errors=0
+PASS case=14 bits=256 TX=2048 RX=2048 recovered=256 total=256 errors=1
+PASS case=15 bits=300 TX=2400 RX=2400 recovered=300 total=300 errors=0
+PASS case=16 bits=0 TX=0 RX=0 recovered=0 total=0 errors=0
+SUMMARY cases=17 mismatches=0 scope=team_rtl
