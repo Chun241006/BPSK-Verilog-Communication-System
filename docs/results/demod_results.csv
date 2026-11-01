@@ -1,0 +1,3 @@
+scenario,bits,expected_bit_errors,observed_bit_errors,ber,rtl_mismatches,status
+0,16,0,0,0.000000,0,PASS
+1,16,1,1,0.062500,0,PASS
