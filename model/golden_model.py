@@ -16,13 +16,85 @@ def random_bits(n):
         bits.append(state & 1)
     return bits
 
+
+def bpsk_modulate(bits):
+    """Convert each input bit into 8 BPSK carrier samples."""
+    tx_samples = []
+
+    for bit in bits:
+        if bit not in (0, 1):
+            raise ValueError("Input bits must be 0 or 1")
+
+        sign = 1 if bit == 0 else -1
+
+        for carrier_sample in CARRIER:
+            tx_samples.append(sign * carrier_sample)
+
+    return tx_samples
+
+
+def apply_channel(tx_samples, error_index):
+    """Invert the selected symbol to simulate a bit error."""
+    rx_samples = []
+
+    for i, sample in enumerate(tx_samples):
+        symbol_index = i // len(CARRIER)
+
+        if symbol_index == error_index:
+            rx_samples.append(-sample)
+        else:
+            rx_samples.append(sample)
+
+    return rx_samples
+
+
+def bpsk_demodulate(rx_samples):
+    """Recover bits using correlation with the reference carrier."""
+    if len(rx_samples) % len(CARRIER) != 0:
+        raise ValueError("Incomplete BPSK symbol")
+
+    recovered_bits = []
+    correlations = []
+
+    for start in range(0, len(rx_samples), len(CARRIER)):
+        correlation = 0
+
+        for k, carrier_sample in enumerate(CARRIER):
+            correlation += rx_samples[start + k] * carrier_sample
+
+        correlations.append(correlation)
+
+        # Negative correlation represents bit 1.
+        recovered_bit = 1 if correlation < 0 else 0
+        recovered_bits.append(recovered_bit)
+
+    return recovered_bits, correlations
+
+
+def count_errors(tx_bits, rx_bits):
+    """Count mismatches between transmitted and recovered bits."""
+    if len(tx_bits) != len(rx_bits):
+        raise ValueError("TX and RX bit counts do not match")
+
+    errors = 0
+
+    for tx_bit, rx_bit in zip(tx_bits, rx_bits):
+        if tx_bit != rx_bit:
+            errors += 1
+
+    return errors
+
+
 def simulate(bits, error_index=-1):
-    tx = [(-1 if b else 1)*c for b in bits for c in CARRIER]
-    rx = [-s if i//8 == error_index else s for i,s in enumerate(tx)]
-    correlations = [sum(s*c for s,c in zip(rx[i:i+8], CARRIER)) for i in range(0,len(rx),8)]
-    recovered = [int(x < 0) for x in correlations]
-    errors = sum(a != b for a,b in zip(bits,recovered))
+    """Run the complete reference BPSK communication chain."""
+    tx = bpsk_modulate(bits)
+    rx = apply_channel(tx, error_index)
+    recovered, correlations = bpsk_demodulate(rx)
+    errors = count_errors(bits, recovered)
+
     return tx, rx, recovered, errors, correlations
+
+
 
 def main():
     defs = [
