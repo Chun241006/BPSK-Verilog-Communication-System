@@ -19,7 +19,7 @@ The top level exposes `data_bit`, `data_valid`, `error_enable`, and `error_symbo
 
 ## 2. BPSK Modulator — detailed architecture
 
-![Figure D1 — BPSK Modulator implementation](images/detailed_modulator.png)
+![Figure D1 — BPSK Modulator implementation](diagrams/modulator.png)
 
 **RTL:** [`rtl/bpsk_modulator.v`](../rtl/bpsk_modulator.v)
 
@@ -33,7 +33,7 @@ The top level exposes `data_bit`, `data_valid`, `error_enable`, and `error_symbo
 
 ## 3. Controlled Channel — detailed architecture
 
-![Figure D2 — Channel implementation](images/detailed_channel.png)
+![Figure D2 — Channel implementation](diagrams/channel.png)
 
 **RTL:** [`rtl/channel.v`](../rtl/channel.v)
 
@@ -46,7 +46,7 @@ The top level exposes `data_bit`, `data_valid`, `error_enable`, and `error_symbo
 
 ## 4. BPSK Demodulator — detailed architecture
 
-![Figure D3 — Correlation demodulator implementation](images/detailed_demodulator.png)
+![Figure D3 — Correlation demodulator implementation](diagrams/demodulator.png)
 
 **RTL:** [`rtl/bpsk_demodulator.v`](../rtl/bpsk_demodulator.v)
 
@@ -66,7 +66,7 @@ For the ideal LUT, `sum(C[k]^2) = 3,999,396`: the expected correlation for a cle
 
 ## 5. BER Counter — detailed architecture
 
-![Figure D4 — BER Counter and TX FIFO implementation](images/detailed_ber_counter.png)
+![Figure D4 — BER Counter](diagrams/ber_counter.png)
 
 **RTL:** [`rtl/ber_counter.v`](../rtl/ber_counter.v)
 
@@ -91,6 +91,7 @@ For the ideal LUT, `sum(C[k]^2) = 3,999,396`: the expected correlation for a cle
 The sample and validity buses must remain paired. The design does not model analog carrier generation, noise power, synchronization, or fractional BER calculation inside the RTL.
 
 ## 7. Golden Model and testbench cross-check
+![Golden Model Flowchart](diagrams/golden_model.png)
 
 - **Reference generator:** [`model/golden_model.py`](../model/golden_model.py) writes the reference bit/sample memories and scenario metadata under `model/reference/`.
 - **Integration testbench:** [`tb/tb_bpsk_system.v`](../tb/tb_bpsk_system.v) loads the reference memories via `$readmemh` and checks actual `dut.tx_sample`, `dut.rx_sample`, recovered bits, and BER counters. It also validates sample-valid pipeline behavior and reset/idle cases.
@@ -110,4 +111,4 @@ The 17-case integrated run includes single-symbol controlled errors but is **not
 | 16-entry TX FIFO and error counters | `rtl/ber_counter.v` | `tb/tb_ber_counter.v`; integrated BER comparison |
 | Registered module connections | `rtl/bpsk_top.v` | `tb/tb_bpsk_system.v` |
 
-These diagrams document the **implemented RTL**, not a proposed analog communication architecture. See [`docs/system_specification.md`](system_specification.md) and [`docs/interface_specification.md`](interface_specification.md) for the corresponding higher-level requirements and port tables.
+These diagrams document the implemented RTL, not a proposed analog communication architecture.

@@ -1,0 +1,49 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="huH94V4Gu8lhMJwX45Mh">
+    <mxGraphModel dx="715" dy="504" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="light-dark(#FFFFFF,#FFFFFF)" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-8" edge="1" parent="1" source="WmzDuY9xAIsBVeroyF0p-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;strokeColor=light-dark(#000000,#000000);" target="WmzDuY9xAIsBVeroyF0p-3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-1" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=light-dark(transparent,#060606);fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="tx_bit, tx_valid" vertex="1">
+          <mxGeometry height="30" width="90" x="290" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-20" edge="1" parent="1" source="WmzDuY9xAIsBVeroyF0p-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;strokeColor=light-dark(#000000,#000000);" target="WmzDuY9xAIsBVeroyF0p-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=light-dark(#000000,#000000);" value="&lt;div&gt;TX FIFO&lt;/div&gt;&lt;div&gt;16 x 1-bit&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="275" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-36" edge="1" parent="1" source="WmzDuY9xAIsBVeroyF0p-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;strokeColor=light-dark(#000000,#000000);" target="WmzDuY9xAIsBVeroyF0p-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#000000,#FFFFFF);fillStyle=auto;strokeColor=light-dark(transparent,#000000);textShadow=1;labelBorderColor=default;fontColor=light-dark(#000000,#000000);" value="Compare" vertex="1">
+          <mxGeometry height="60" width="120" x="275" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-7" edge="1" parent="1" source="WmzDuY9xAIsBVeroyF0p-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;strokeColor=light-dark(#000000,#000000);" target="WmzDuY9xAIsBVeroyF0p-5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=light-dark(#000000,#000000);fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#0A0A0A);" value="rx_bit, rx_valid" vertex="1">
+          <mxGeometry height="30" width="110" x="110" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);fontColor=light-dark(#000000,#000000);" value="Total bits&lt;div&gt;Counter&lt;/div&gt;&lt;div&gt;total_bits[31:0]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="105" x="170" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFFFF,#FFFFFF);strokeColor=light-dark(#000000,#000000);" value="Error bits&lt;div&gt;Counter&lt;/div&gt;&lt;div&gt;error_bits[31:0]&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="105" x="395" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-35" edge="1" parent="1" source="WmzDuY9xAIsBVeroyF0p-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.541;entryY=-0.067;entryDx=0;entryDy=0;entryPerimeter=0;defaultLabelBackgroundColor=page;strokeColor=light-dark(#000000,#000000);" target="WmzDuY9xAIsBVeroyF0p-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-37" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#000000);" value="Valid RX" vertex="1">
+          <mxGeometry height="30" width="60" x="240" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="WmzDuY9xAIsBVeroyF0p-38" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontColor=light-dark(#000000,#060606);" value="TX != RX" vertex="1">
+          <mxGeometry height="30" width="60" x="370" y="370" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
