@@ -110,4 +110,4 @@ The 17-case integrated run includes single-symbol controlled errors but is **not
 | 16-entry TX FIFO and error counters | `rtl/ber_counter.v` | `tb/tb_ber_counter.v`; integrated BER comparison |
 | Registered module connections | `rtl/bpsk_top.v` | `tb/tb_bpsk_system.v` |
 
-These diagrams document the **implemented RTL**, not a proposed analog communication architecture. See [`docs/system_specification.md`](system_specification.md) and [`docs/interface_specification.md`](interface_specification.md) for the corresponding higher-level requirements and port tables.
+These diagrams document the implemented RTL, not a proposed analog communication architecture.
