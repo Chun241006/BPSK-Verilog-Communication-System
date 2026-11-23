@@ -86,7 +86,7 @@ Draw.io diagrams are stored in `docs/diagrams/`.
 
 ## Report
 
-[Final Project Report](docs/COS201_BPSK_Final_Report.docx)
+[Final Project Report](docs/COS201_Report.pdf)
 
 ## Limitations
 
